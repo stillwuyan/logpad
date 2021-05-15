@@ -7,9 +7,9 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui.h"
-#include "glfwcontainer.hpp"
-#include "en_font.hpp"
-#include "zh_font.hpp"
+#include "platform/glfw/glfwcontainer.hpp"
+#include "fonts/en_font.hpp"
+#include "fonts/zh_font.hpp"
 
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <GLES2/gl2.h>

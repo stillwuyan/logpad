@@ -3,8 +3,8 @@
 // If you are new to Dear ImGui, read documentation from the docs/ folder + read the top of imgui.cpp.
 // Read online: https://github.com/ocornut/imgui/tree/master/docs
 
-#include "glfwcontainer.hpp"
-#include "mainwindow.hpp"
+#include "platform/glfw/glfwcontainer.hpp"
+#include "windows/mainwindow.hpp"
 
 int main(int, char**) {
     std::string name("main");

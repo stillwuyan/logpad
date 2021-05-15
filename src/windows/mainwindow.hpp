@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include <functional>
-#include "windowbase.hpp"
+#include "framework/windowbase.hpp"
 #include "imgui.h"
 
 namespace window { namespace logpad {
@@ -19,7 +19,7 @@ public:
     void Resize(int width, int height) final override;
 
 private:
-    void Hotkey();
+    void HandleKeyboard();
     bool ShowDemo();
     bool ShowSearch();
 

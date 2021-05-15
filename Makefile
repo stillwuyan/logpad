@@ -15,14 +15,22 @@
 #CXX = clang++
 
 EXE = logpad
-IMGUI_DIR = ../imgui
+IMGUI_DIR = imgui
+GLFW_DIR = src/platform/glfw
+FRAMEWORK_DIR = src/framework
+WINDOWS_DIR = src/windows
+GL3W_DIR = imgui/examples/libs/gl3w
+GLAD_DIR = imgui/examples/libs/glad
+
+OUTPUT_DIR = dist
+
 SOURCES = src/main.cpp
-
-SOURCES += src/glfwcontainer.cpp src/mainwindow.cpp
-
+SOURCES += $(GLFW_DIR)/glfwcontainer.cpp
+SOURCES += $(WINDOWS_DIR)/mainwindow.cpp
 SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
 SOURCES += $(IMGUI_DIR)/backends/imgui_impl_glfw.cpp $(IMGUI_DIR)/backends/imgui_impl_opengl3.cpp
-OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))
+
+OBJS = $(addprefix $(OUTPUT_DIR)/, $(addsuffix .o, $(basename $(notdir $(SOURCES)))))
 UNAME_S := $(shell uname -s)
 LINUX_GL_LIBS = -lGL
 
@@ -38,8 +46,8 @@ LIBS =
 ## the following if you want to use OpenGL ES instead of Desktop GL.
 
 ## Using OpenGL loader: gl3w [default]
-SOURCES += ../imgui/examples/libs/gl3w/GL/gl3w.c
-CXXFLAGS += -I../imgui/examples/libs/gl3w -DIMGUI_IMPL_OPENGL_LOADER_GL3W
+SOURCES += $(GL3W_DIR)/GL/gl3w.c
+CXXFLAGS += -I$(GL3W_DIR) -DIMGUI_IMPL_OPENGL_LOADER_GL3W
 
 ## Using OpenGL loader: glew
 ## (This assumes a system-wide installation)
@@ -106,26 +114,35 @@ endif
 ## BUILD RULES
 ##---------------------------------------------------------------------
 
-%.o:%.cpp
+$(OUTPUT_DIR)/%.o:src/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-%.o:$(IMGUI_DIR)/%.cpp
+$(OUTPUT_DIR)/%.o:$(GLFW_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-%.o:$(IMGUI_DIR)/backends/%.cpp
+$(OUTPUT_DIR)/%.o:$(WINDOWS_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-%.o:../imgui/examples/libs/gl3w/GL/%.c
+$(OUTPUT_DIR)/%.o:$(IMGUI_DIR)/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OUTPUT_DIR)/%.o:$(IMGUI_DIR)/backends/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OUTPUT_DIR)/%.o:$(GL3W_DIR)/GL/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-%.o:../imgui/examples/libs/glad/src/%.c
+$(OUTPUT_DIR)/%.o:$(GLAD_DIR)/src/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-all: $(EXE)
+all: dist $(OUTPUT_DIR)/$(EXE)
 	@echo Build complete for $(ECHO_MESSAGE)
 
-$(EXE): $(OBJS)
+dist:
+	mkdir dist
+
+$(OUTPUT_DIR)/$(EXE): $(OBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBS)
 
 clean:
-	rm -f $(EXE) $(OBJS)
+	rm -f $(OUTPUT_DIR)/$(EXE) $(OUTPUT_DIR)/$(OBJS)

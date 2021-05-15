@@ -9,7 +9,7 @@
 #include <string>
 #include <map>
 #include <memory>
-#include "windowbase.hpp"
+#include "framework/windowbase.hpp"
 
 class GLFWwindow;
 

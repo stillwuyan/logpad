@@ -1,5 +1,5 @@
 #include <fstream>
-#include "mainwindow.hpp"
+#include "windows/mainwindow.hpp"
 
 using namespace window::logpad;
 
@@ -72,7 +72,7 @@ void MainWindow::Draw()
         }
     }
 
-    Hotkey();
+    HandleKeyboard();
 }
 
 void MainWindow::Resize(int width, int height)
@@ -85,7 +85,7 @@ void MainWindow::Resize(int width, int height)
     }
 }
 
-void MainWindow::Hotkey()
+void MainWindow::HandleKeyboard()
 {
     for (auto& item : _show_window)
     {
