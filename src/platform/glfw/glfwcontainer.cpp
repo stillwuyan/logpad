@@ -4,9 +4,9 @@
 // Read online: https://github.com/ocornut/imgui/tree/master/docs
 
 #include <cstdio>
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
-#include "imgui.h"
+#include <imgui/imgui.h>
+#include <imgui/backends/imgui_impl_glfw.h>
+#include <imgui/backends/imgui_impl_opengl3.h>
 #include "platform/glfw/glfwcontainer.hpp"
 #include "fonts/en_font.hpp"
 #include "fonts/zh_font.hpp"
@@ -70,7 +70,7 @@ GLFWContainer::GLFWContainer(int width, int height)
 , _mode(WindowMode::window)
 , _width{width, 0}, _height{height, 0}
 , _interval(2)
-, _en_font_size(20.0f)
+, _en_font_size(24.0f)
 , _name("Log Viewer")
 {
 }

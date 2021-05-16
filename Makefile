@@ -21,6 +21,7 @@ FRAMEWORK_DIR = src/framework
 WINDOWS_DIR = src/windows
 GL3W_DIR = imgui/examples/libs/gl3w
 GLAD_DIR = imgui/examples/libs/glad
+ADDONS_DIR = imgui-addons/FileBrowser
 
 OUTPUT_DIR = dist
 
@@ -29,12 +30,13 @@ SOURCES += $(GLFW_DIR)/glfwcontainer.cpp
 SOURCES += $(WINDOWS_DIR)/mainwindow.cpp
 SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
 SOURCES += $(IMGUI_DIR)/backends/imgui_impl_glfw.cpp $(IMGUI_DIR)/backends/imgui_impl_opengl3.cpp
+SOURCES += $(ADDONS_DIR)/ImGuiFileBrowser.cpp
 
 OBJS = $(addprefix $(OUTPUT_DIR)/, $(addsuffix .o, $(basename $(notdir $(SOURCES)))))
 UNAME_S := $(shell uname -s)
 LINUX_GL_LIBS = -lGL
 
-CXXFLAGS = -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -Isrc
+CXXFLAGS = -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -I$(ADDONS_DIR) -Isrc -I.
 CXXFLAGS += -g -Wall -Wformat
 LIBS =
 
@@ -129,6 +131,9 @@ $(OUTPUT_DIR)/%.o:$(IMGUI_DIR)/%.cpp
 $(OUTPUT_DIR)/%.o:$(IMGUI_DIR)/backends/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
+$(OUTPUT_DIR)/%.o:$(ADDONS_DIR)/%.cpp
+	$(CXX) $(CXXFLAGS) -Wno-unused-function -c -o $@ $<
+
 $(OUTPUT_DIR)/%.o:$(GL3W_DIR)/GL/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
@@ -145,4 +150,4 @@ $(OUTPUT_DIR)/$(EXE): $(OBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBS)
 
 clean:
-	rm -f $(OUTPUT_DIR)/$(EXE) $(OUTPUT_DIR)/$(OBJS)
+	rm -f $(OUTPUT_DIR)/$(EXE) $(OUTPUT_DIR)/*.o
