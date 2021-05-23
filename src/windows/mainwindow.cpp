@@ -1,4 +1,3 @@
-#include <fstream>
 #include "windows/mainwindow.hpp"
 
 using namespace window::logpad;
@@ -8,7 +7,6 @@ MainWindow::MainWindow(const std::string& name)
 , _selected(-1)
 , _width(0)
 , _height(0)
-, _lines_count(0)
 , _name(name)
 , _key_handler {
     {[](ImGuiIO& io) {return ImGui::IsKeyPressed(290/*f1*/);}, false, MainWindow::ShowDemo},
@@ -42,17 +40,17 @@ void MainWindow::Draw()
     ImGui::BeginChild("itemlist", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar);
  
     ImGuiListClipper clipper;
-    clipper.Begin(_lines_count);
+    clipper.Begin(_reader.LineNo());
     while (clipper.Step())
     {
         for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
         {
-            auto ret = ImGui::Selectable(_data[i].c_str(), (i==_selected) ? true : false);
+            auto ret = ImGui::Selectable(_reader[i].c_str(), (i==_selected) ? true : false);
             if (ret)
             {
                 _selected = i;
             }
-            HighlightMatch(_data[i]);
+            HighlightMatch(_reader[i]);
         }
     }
     clipper.End();
@@ -239,19 +237,8 @@ bool MainWindow::OpenFile()
                                     ImVec2(800, 600),
                                     ".log,old,.bin"))
     {
-        if (_lines_count > 0)
-        {
-            _data.clear();
-            _lines_count = 0;
-        }
-
-        std::ifstream file(_file_dialog.selected_path);
-        std::string line;
-        while (std::getline(file, line))
-        {
-            _data.emplace_back(line);
-        }
-        _lines_count = _data.size();
+        // read file
+        _reader.Open(_file_dialog.selected_path);
     }
 
     return ImGui::IsPopupOpen("Open File");

@@ -15,19 +15,23 @@
 #CXX = clang++
 
 EXE = logpad
-IMGUI_DIR = imgui
-GLFW_DIR = src/platform/glfw
+OUTPUT_DIR = dist
+
 FRAMEWORK_DIR = src/framework
 WINDOWS_DIR = src/windows
+INPUT_DIR = src/input
+GLFW_DIR = src/platform/glfw
+
+IMGUI_DIR = imgui
 GL3W_DIR = imgui/examples/libs/gl3w
 GLAD_DIR = imgui/examples/libs/glad
 ADDONS_DIR = imgui-addons/FileBrowser
 
-OUTPUT_DIR = dist
-
 SOURCES = src/main.cpp
-SOURCES += $(GLFW_DIR)/glfwcontainer.cpp
 SOURCES += $(WINDOWS_DIR)/mainwindow.cpp
+SOURCES += $(INPUT_DIR)/filereader.cpp
+SOURCES += $(GLFW_DIR)/glfwcontainer.cpp
+
 SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
 SOURCES += $(IMGUI_DIR)/backends/imgui_impl_glfw.cpp $(IMGUI_DIR)/backends/imgui_impl_opengl3.cpp
 SOURCES += $(ADDONS_DIR)/ImGuiFileBrowser.cpp
@@ -116,13 +120,18 @@ endif
 ## BUILD RULES
 ##---------------------------------------------------------------------
 
+%.cpp : %.hpp
+
 $(OUTPUT_DIR)/%.o:src/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-$(OUTPUT_DIR)/%.o:$(GLFW_DIR)/%.cpp
+$(OUTPUT_DIR)/%.o:$(WINDOWS_DIR)/%.cpp $(WINDOWS_DIR)/%.hpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-$(OUTPUT_DIR)/%.o:$(WINDOWS_DIR)/%.cpp
+$(OUTPUT_DIR)/%.o:$(INPUT_DIR)/%.cpp $(INPUT_DIR)/%.hpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(OUTPUT_DIR)/%.o:$(GLFW_DIR)/%.cpp $(GLFW_DIR)/%.hpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(OUTPUT_DIR)/%.o:$(IMGUI_DIR)/%.cpp
@@ -131,14 +140,14 @@ $(OUTPUT_DIR)/%.o:$(IMGUI_DIR)/%.cpp
 $(OUTPUT_DIR)/%.o:$(IMGUI_DIR)/backends/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-$(OUTPUT_DIR)/%.o:$(ADDONS_DIR)/%.cpp
-	$(CXX) $(CXXFLAGS) -Wno-unused-function -c -o $@ $<
-
 $(OUTPUT_DIR)/%.o:$(GL3W_DIR)/GL/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 $(OUTPUT_DIR)/%.o:$(GLAD_DIR)/src/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(OUTPUT_DIR)/%.o:$(ADDONS_DIR)/%.cpp
+	$(CXX) $(CXXFLAGS) -Wno-unused-function -c -o $@ $<
 
 all: dist $(OUTPUT_DIR)/$(EXE)
 	@echo Build complete for $(ECHO_MESSAGE)

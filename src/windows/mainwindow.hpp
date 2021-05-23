@@ -8,6 +8,7 @@
 #include <imgui/imgui.h>
 #include <imgui-addons/FileBrowser/ImGuiFileBrowser.h>
 #include "framework/windowbase.hpp"
+#include "input/filereader.hpp"
 
 namespace window { namespace logpad {
 
@@ -35,9 +36,8 @@ private:
     int _selected;
     int _width;
     int _height;
-    size_t _lines_count;
     const std::string _name;
-    std::vector<std::string> _data;
+    FileReader _reader;
     std::vector<std::tuple<KeyPressFunc, bool, WindowProc>> _key_handler;
     imgui_addons::ImGuiFileBrowser _file_dialog;
     char _search_text[1024];
