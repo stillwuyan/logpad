@@ -6,9 +6,9 @@
 #include <regex>
 #include <functional>
 #include <imgui/imgui.h>
-#include <imgui-addons/FileBrowser/ImGuiFileBrowser.h>
 #include "framework/windowbase.hpp"
 #include "input/filereader.hpp"
+#include "windows/filedialog.hpp"
 
 namespace window { namespace logpad {
 
@@ -18,29 +18,16 @@ public:
     MainWindow(const std::string& name);
     ~MainWindow() = default;
 
-    void Draw() final override;
-    void Resize(int width, int height) final override;
+    void Show() final override;
 
 private:
-    using KeyPressFunc = std::function<bool(ImGuiIO&)>;
-    using WindowProc = std::function<bool(MainWindow*)>;
-
-    void HandleKeyboard();
     void HighlightMatch(const std::string& text);
-    bool ShowDemo();
-    bool ShowSearch();
-    bool OpenFile();
+    void ShowDialog();
 
-    ImGuiWindowFlags _flags;
-    bool _resize;
     int _selected;
-    int _width;
-    int _height;
-    const std::string _name;
     FileReader _reader;
-    std::vector<std::tuple<KeyPressFunc, bool, WindowProc>> _key_handler;
-    imgui_addons::ImGuiFileBrowser _file_dialog;
     char _search_text[1024];
+    std::unique_ptr<FileDialog> _open_file;
 };
 
 }}  // namespace end

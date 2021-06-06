@@ -30,7 +30,7 @@ ADDONS_DIR = imgui-addons/FileBrowser
 SOURCES = src/main.cpp
 SOURCES += $(WINDOWS_DIR)/mainwindow.cpp
 SOURCES += $(INPUT_DIR)/filereader.cpp
-SOURCES += $(GLFW_DIR)/glfwcontainer.cpp
+SOURCES += $(GLFW_DIR)/glfwbackend.cpp
 
 SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
 SOURCES += $(IMGUI_DIR)/backends/imgui_impl_glfw.cpp $(IMGUI_DIR)/backends/imgui_impl_opengl3.cpp
@@ -92,7 +92,7 @@ ifeq ($(UNAME_S), Linux) #LINUX
 
 	CXXFLAGS += `pkg-config --cflags glfw3`
 	CFLAGS = $(CXXFLAGS)
-	CXXFLAGS += -std=c++17
+	CXXFLAGS += -std=c++20
 endif
 
 ifeq ($(UNAME_S), Darwin) #APPLE
@@ -104,7 +104,7 @@ ifeq ($(UNAME_S), Darwin) #APPLE
 
 	CXXFLAGS += -I/usr/local/include -I/opt/local/include -I/opt/homebrew/include
 	CFLAGS = $(CXXFLAGS)
-	CXXFLAGS += -std=c++17
+	CXXFLAGS += -std=c++20
 endif
 
 ifeq ($(OS), Windows_NT)
@@ -113,7 +113,7 @@ ifeq ($(OS), Windows_NT)
 
 	CXXFLAGS += `pkg-config --cflags glfw3`
 	CFLAGS = $(CXXFLAGS)
-	CXXFLAGS += -std=c++17
+	CXXFLAGS += -std=c++20
 endif
 
 ##---------------------------------------------------------------------
@@ -157,6 +157,9 @@ dist:
 
 $(OUTPUT_DIR)/$(EXE): $(OBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBS)
+
+run: dist $(OUTPUT_DIR)/$(EXE)
+	dist/logpad.exe
 
 clean:
 	rm -f $(OUTPUT_DIR)/$(EXE) $(OUTPUT_DIR)/*.o
