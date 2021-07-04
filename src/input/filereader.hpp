@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 #include <atomic>
-#include <mutex>
 
 namespace window { namespace logpad {
 
@@ -18,6 +17,7 @@ public:
     void Open(const std::string& file);
     const std::string& operator[](size_t index);
     size_t LineNo();
+    const std::string& CurrentFile();
 
 private:
     void Prefetch();
@@ -26,7 +26,7 @@ private:
     std::string _file;
     std::vector<std::string> _lines;
     std::atomic<size_t> _lines_no;
-    std::mutex _lines_mtx;
+    std::atomic<bool> _loading;
 };
 
 }}  // namespace end

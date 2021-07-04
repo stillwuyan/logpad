@@ -9,15 +9,19 @@ namespace window { namespace logpad {
 class DemoWindow : public WindowChild
 {
 public:
-    DemoWindow() = default;
+    DemoWindow(const std::string name)
+    : WindowChild(name)
+    {}
     ~DemoWindow() = default;
 
-    bool Show() final override
+    bool Draw() final override
     {
         bool open = true;
         ImGui::ShowDemoWindow(&open);
         return open;
     }
+
+    void Show() final override {}
 };
 
 }}

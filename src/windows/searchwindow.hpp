@@ -1,6 +1,9 @@
 #ifndef SEARCH_WINDOWN_HPP
 #define SEARCH_WINDOWN_HPP
 
+#include <vector>
+#include <string>
+#include <atomic>
 #include <imgui/imgui.h>
 #include "framework/windowchild.hpp"
 
@@ -9,15 +12,17 @@ namespace window { namespace logpad {
 class SearchWindow : public WindowChild
 {
 public:
-    SearchWindow() = default;
+    SearchWindow(const std::string& name, const std::string& file);
     ~SearchWindow() = default;
 
-    bool Show() final override
-    {
-        bool open = true;
-        ImGui::ShowDemoWindow(&open);
-        return open;
-    }
+    void Show() final override;
+
+private:
+    const std::string _file;
+    int _selected;
+    std::atomic<bool> _searching;
+    char _search_text[1024];
+    std::vector<std::string> _lines;
 };
 
 }}

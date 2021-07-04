@@ -10,16 +10,11 @@
 #include <map>
 #include <memory>
 #include "framework/windowcontainer.hpp"
+#include "framework/common.hpp"
 
 class GLFWwindow;
 
 namespace window {
-
-enum WindowMode
-{
-    window = 0,
-    fullscreen = 1,
-};
 
 class GLFWBackend
 {

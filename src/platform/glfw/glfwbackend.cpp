@@ -184,14 +184,15 @@ void GLFWBackend::Initialize()
     {
         GLFWmonitor* monitor = glfwGetPrimaryMonitor();
         const GLFWvidmode* vidmode = glfwGetVideoMode(monitor);
-        _width[WindowMode::fullscreen] = vidmode->width;
-        _height[WindowMode::fullscreen] = vidmode->height;
+        _width[static_cast<uint8_t>(WindowMode::fullscreen)] = vidmode->width;
+        _height[static_cast<uint8_t>(WindowMode::fullscreen)] = vidmode->height;
         glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
         _window = glfwCreateWindow(vidmode->width, vidmode->height+1, _name.c_str(), NULL, NULL);
     }
     else
     {
-        _window = glfwCreateWindow(_width[_mode], _height[_mode]+1, _name.c_str(), NULL, NULL);
+        _window = glfwCreateWindow(_width[static_cast<uint8_t>(_mode)],
+                                   _height[static_cast<uint8_t>(_mode)]+1, _name.c_str(), NULL, NULL);
     }
     if (_window == nullptr)
     {
@@ -254,7 +255,7 @@ void GLFWBackend::Initialize()
     glfwSetWindowUserPointer(_window, this);
     glfwSetWindowSizeCallback(_window, GLFWBackend::SizeCallback);
 
-    OnSize(_width[_mode], _height[_mode]);
+    OnSize(_width[static_cast<uint8_t>(_mode)], _height[static_cast<uint8_t>(_mode)]);
     return;
 }
 
@@ -289,8 +290,8 @@ void GLFWBackend::ChangeMode()
 
 void GLFWBackend::OnSize(int width, int height)
 {
-    _width[_mode] = width;
-    _height[_mode] = height;
+    _width[static_cast<uint8_t>(_mode)] = width;
+    _height[static_cast<uint8_t>(_mode)] = height;
     for (auto& child : _child_windows)
     {
         child.second->Resize(width, height);

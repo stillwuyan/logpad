@@ -10,28 +10,39 @@ MainWindow::MainWindow(const std::string& name)
 , _open_file(nullptr)
 {
     _key_handler = {
-        {
-            [](ImGuiIO& io) {return ImGui::IsKeyPressed(290/*F1*/);},
-            [this]() {
-                UpdateChildWindow("Demo", std::unique_ptr<WindowChild>(new DemoWindow()));
+        {   
+            "Demo",
+            {
+                [](ImGuiIO&) {
+                    return ImGui::IsKeyPressed(290/*F1*/);
+                },
+                [this]() {
+                    UpdateChildWindow("Demo", std::unique_ptr<WindowChild>(new DemoWindow("Demo")));
+                }
             }
         },
         {
-            [](ImGuiIO& io) {
-                return ImGui::IsKeyPressed(292/*F3*/);
-            },
-            [this]() {
-                UpdateChildWindow("Search", std::unique_ptr<WindowChild>(new SearchWindow()));
+            "Search",
+            {
+                [](ImGuiIO&) {
+                    return ImGui::IsKeyPressed(292/*F3*/);
+                },
+                [this]() {
+                    UpdateChildWindow("Search", std::unique_ptr<WindowChild>(new SearchWindow("Search", _reader.CurrentFile())));
+                }
             }
         },
         {
-            [](ImGuiIO& io) {
-                return io.KeyCtrl && ImGui::IsKeyPressed(79/*o*/);
-            },
-            [this]() {
-                _open_file = std::make_unique<FileDialog>([this](const std::string& file) {
-                    _reader.Open(file);
-                });
+            "Open",
+            {
+                [](ImGuiIO& io) {
+                    return io.KeyCtrl && ImGui::IsKeyPressed(79/*o*/);
+                },
+                [this]() {
+                    _open_file = std::make_unique<FileDialog>([this](const std::string& file) {
+                        _reader.Open(file);
+                    });
+                }
             }
         }
     };
@@ -44,7 +55,9 @@ void MainWindow::Show()
     ImGui::Begin(_name.c_str(), NULL, _flags);
 
     // ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-    ImGui::InputText("Search text", _search_text, 1024);
+    ImGui::InputText("Highlight", _search_text, 1024);
+
+    ImGui::Text("Total lines: %lld", _reader.LineNo());
 
     ImGui::BeginChild("itemlist", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar); 
 

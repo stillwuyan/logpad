@@ -9,6 +9,7 @@ using namespace window::logpad;
 FileReader::FileReader(const std::string& file)
 : _file(file)
 , _lines_no(0)
+, _loading(false)
 {
     Prefetch();
 }
@@ -19,10 +20,16 @@ FileReader::FileReader()
 
 void FileReader::Open(const std::string& file)
 {
-    _file = file;
-    if (_lines_no > 0)
+    if (_loading.load(std::memory_order_relaxed))
     {
-        _lines_no.store(0, std::memory_order_release);
+        _loading.store(false, std::memory_order_release);
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    }
+
+    _file = file;
+    if (_lines_no.load(std::memory_order_relaxed) > 0)
+    {
+        _lines_no.store(0, std::memory_order_relaxed);
         _lines.clear();
     }
     Prefetch();
@@ -30,26 +37,31 @@ void FileReader::Open(const std::string& file)
 
 const std::string& FileReader::operator[](size_t index)
 {
-    std::lock_guard<std::mutex> lck(_lines_mtx);
     return _lines.at(index);
 
 }
 
 size_t FileReader::LineNo()
 {
-    return _lines_no.load(std::memory_order_acquire);
+    return _lines_no.load(std::memory_order_relaxed);
+}
+
+
+const std::string& FileReader::CurrentFile()
+{
+    return _file;
 }
 
 void FileReader::Prefetch()
 {
     std::thread t([this]{
+        _loading.store(true, std::memory_order_release);
         std::ifstream reader(_file);
         std::string line;
-        while (std::getline(reader, line))
+        while (_loading.load(std::memory_order_relaxed) && std::getline(reader, line))
         {
-            std::lock_guard<std::mutex> lck(_lines_mtx);
             _lines.emplace_back(line);
-            _lines_no.fetch_add(1, std::memory_order_release);
+            _lines_no.fetch_add(1, std::memory_order_seq_cst);
         }
     });
     t.detach();

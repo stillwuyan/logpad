@@ -4,6 +4,8 @@
 #include <string>
 #include <functional>
 #include <memory>
+#include <map>
+#include <tuple>
 #include <imgui/imgui.h>
 #include "framework/windowcontainer.hpp"
 #include "framework/windowchild.hpp"
@@ -43,7 +45,7 @@ public:
         Show();
 
         std::erase_if(_child_windows, [](const auto& item) {
-            bool ret = item.second->Show();
+            bool ret = item.second->Draw();
             return !ret;
         });
 
@@ -60,13 +62,15 @@ public:
     }
 
 protected:
-    using KeyHandlerList = std::vector<std::tuple<std::function<bool(ImGuiIO&)>, std::function<void()>>>;
+    using KeyHandlers = std::map<std::string, std::tuple<std::function<bool(ImGuiIO&)>, std::function<void()>>>;
+    using ChildWindows = std::map<std::string, std::unique_ptr<WindowChild>>;
 
     virtual void Show() = 0;
+
     void HandleKeyboard()
     {
         auto& io = ImGui::GetIO();
-        for (auto& item : _key_handler)
+        for (auto&& [_, item] : _key_handler)
         {
             if (std::get<0>(item)(io))
             {
@@ -94,8 +98,8 @@ protected:
     int _height;
     const std::string _name;
 
-    KeyHandlerList _key_handler;
-    std::map<std::string, std::unique_ptr<WindowChild>> _child_windows;
+    KeyHandlers _key_handler;
+    ChildWindows _child_windows;
 };
 
 }   // namespace end
