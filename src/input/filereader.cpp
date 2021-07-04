@@ -27,9 +27,9 @@ void FileReader::Open(const std::string& file)
     }
 
     _file = file;
-    if (_lines_no.load(std::memory_order_relaxed) > 0)
+    if (_lines_no > 0)
     {
-        _lines_no.store(0, std::memory_order_relaxed);
+        _lines_no = 0;
         _lines.clear();
     }
     Prefetch();
@@ -37,13 +37,15 @@ void FileReader::Open(const std::string& file)
 
 const std::string& FileReader::operator[](size_t index)
 {
+    std::lock_guard<std::mutex> lck(_lines_mtx);
     return _lines.at(index);
 
 }
 
 size_t FileReader::LineNo()
 {
-    return _lines_no.load(std::memory_order_relaxed);
+    std::lock_guard<std::mutex> lck(_lines_mtx);
+    return _lines_no;
 }
 
 
@@ -60,8 +62,9 @@ void FileReader::Prefetch()
         std::string line;
         while (_loading.load(std::memory_order_relaxed) && std::getline(reader, line))
         {
+            std::lock_guard<std::mutex> lck(_lines_mtx);
             _lines.emplace_back(line);
-            _lines_no.fetch_add(1, std::memory_order_seq_cst);
+            _lines_no += 1;
         }
     });
     t.detach();

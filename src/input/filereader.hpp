@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <atomic>
+#include <mutex>
 
 namespace window { namespace logpad {
 
@@ -25,8 +26,9 @@ private:
 
     std::string _file;
     std::vector<std::string> _lines;
-    std::atomic<size_t> _lines_no;
+    size_t _lines_no;
     std::atomic<bool> _loading;
+    std::mutex _lines_mtx;
 };
 
 }}  // namespace end
