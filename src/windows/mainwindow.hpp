@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <regex>
+#include <memory>
 #include <functional>
 #include <imgui/imgui.h>
 #include "framework/windowbase.hpp"

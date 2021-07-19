@@ -27,6 +27,8 @@ GL3W_DIR = imgui/examples/libs/gl3w
 GLAD_DIR = imgui/examples/libs/glad
 ADDONS_DIR = imgui-addons/FileBrowser
 
+YAML_DIR = dependencies/yaml-cpp
+
 SOURCES = src/main.cpp
 SOURCES += $(WINDOWS_DIR)/mainwindow.cpp
 SOURCES += $(WINDOWS_DIR)/searchwindow.cpp
@@ -41,7 +43,7 @@ OBJS = $(addprefix $(OUTPUT_DIR)/, $(addsuffix .o, $(basename $(notdir $(SOURCES
 UNAME_S := $(shell uname -s)
 LINUX_GL_LIBS = -lGL
 
-CXXFLAGS = -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -I$(ADDONS_DIR) -Isrc -I.
+CXXFLAGS = -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -I$(ADDONS_DIR) -I$(YAML_DIR)/include -Isrc -I.
 CXXFLAGS += -g -Wall -Wformat
 LIBS =
 
@@ -91,6 +93,9 @@ ifeq ($(UNAME_S), Linux) #LINUX
 	ECHO_MESSAGE = "Linux"
 	LIBS += $(LINUX_GL_LIBS) `pkg-config --static --libs glfw3`
 
+	LIBS += -L$(YAML_DIR)/lib
+	LIBS += -lyaml-cpp
+
 	CXXFLAGS += `pkg-config --cflags glfw3`
 	CFLAGS = $(CXXFLAGS)
 	CXXFLAGS += -std=c++20
@@ -103,6 +108,9 @@ ifeq ($(UNAME_S), Darwin) #APPLE
 	#LIBS += -lglfw3
 	LIBS += -lglfw
 
+	LIBS += -L$(YAML_DIR)/lib
+	LIBS += -lyaml-cpp
+
 	CXXFLAGS += -I/usr/local/include -I/opt/local/include -I/opt/homebrew/include
 	CFLAGS = $(CXXFLAGS)
 	CXXFLAGS += -std=c++20
@@ -111,6 +119,9 @@ endif
 ifeq ($(OS), Windows_NT)
 	ECHO_MESSAGE = "MinGW"
 	LIBS += -lglfw3 -lgdi32 -lopengl32 -limm32
+
+	LIBS += -L$(YAML_DIR)/lib
+	LIBS += -lyaml-cpp
 
 	CXXFLAGS += `pkg-config --cflags glfw3`
 	CFLAGS = $(CXXFLAGS)
@@ -159,8 +170,11 @@ dist:
 $(OUTPUT_DIR)/$(EXE): $(OBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIBS)
 
-run: dist $(OUTPUT_DIR)/$(EXE)
-	dist/logpad.exe
+$(OUTPUT_DIR)/libyaml-cpp.dll: $(YAML_DIR)/lib/libyaml-cpp.dll
+	cp $(YAML_DIR)/lib/* dist/
+
+run: dist $(OUTPUT_DIR)/$(EXE) $(OUTPUT_DIR)/libyaml-cpp.dll
+	@cd dist/ && ./logpad.exe
 
 clean:
 	rm -f $(OUTPUT_DIR)/$(EXE) $(OUTPUT_DIR)/*.o
