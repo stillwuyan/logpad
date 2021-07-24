@@ -6,6 +6,7 @@
 #include <atomic>
 #include <imgui/imgui.h>
 #include "framework/windowchild.hpp"
+#include "input/filefilter.hpp"
 
 namespace window { namespace logpad {
 
@@ -18,11 +19,10 @@ public:
     void Show() final override;
 
 private:
-    const std::string _file;
+    FileFilter _filter;
     int _selected;
     std::atomic<bool> _searching;
     char _search_text[1024];
-    std::vector<std::string> _lines;
 };
 
 }}

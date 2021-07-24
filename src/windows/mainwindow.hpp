@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <string>
-#include <regex>
 #include <memory>
 #include <functional>
 #include <imgui/imgui.h>
@@ -22,7 +21,6 @@ public:
     void Show() final override;
 
 private:
-    void HighlightMatch(const std::string& text);
     void ShowDialog();
 
     int _selected;

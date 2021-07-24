@@ -32,6 +32,7 @@ YAML_DIR = dependencies/yaml-cpp
 SOURCES = src/main.cpp
 SOURCES += $(WINDOWS_DIR)/mainwindow.cpp
 SOURCES += $(WINDOWS_DIR)/searchwindow.cpp
+SOURCES += $(INPUT_DIR)/filefilter.cpp
 SOURCES += $(INPUT_DIR)/filereader.cpp
 SOURCES += $(GLFW_DIR)/glfwbackend.cpp
 

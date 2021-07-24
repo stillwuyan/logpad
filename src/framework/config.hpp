@@ -13,10 +13,10 @@ public:
     ~Config() = default;
     static Config& GetInstance()
     {
-        return *staticInstance();
+        return *StaticInstance();
     }
 
-    std::string filter_tools
+    std::string filter_tools;
 
 private:
     Config() = delete;
@@ -28,12 +28,12 @@ private:
     Config(const std::string& file)
     {
         _conf = YAML::LoadFile(file);
-        filter_tools = config["filter_tools"].as<std::string>();
+        filter_tools = _conf["filter_tools"].as<std::string>();
     }
 
     static std::unique_ptr<Config>& StaticInstance()
     {
-        static auto instance = std::make_unique<Config>("config.yml");
+        static std::unique_ptr<Config> instance(new Config("config.yml"));
         return instance;
     }
 

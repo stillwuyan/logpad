@@ -1,10 +1,11 @@
 #include "windows/searchwindow.hpp"
+#include "framework/common.hpp"
 
 using namespace window::logpad;
 
 SearchWindow::SearchWindow(const std::string& name, const std::string& file)
 : WindowChild(name)
-, _file(file)
+, _filter(file)
 , _selected(-1)
 , _searching(false)
 {
@@ -17,20 +18,21 @@ void SearchWindow::Show()
     if (ImGui::IsItemDeactivatedAfterEdit())
     {
         _searching = true;
+        _filter.Search(_search_text);
     }
 
     ImGuiListClipper clipper;
-    clipper.Begin(_lines.size());
+    clipper.Begin(_filter.LineNo());
     while (clipper.Step())
     {
         for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
         {
-            auto ret = ImGui::Selectable(_lines[i].c_str(), (i==_selected) ? true : false);
+            auto ret = ImGui::Selectable(_filter[i].c_str(), (i==_selected) ? true : false);
             if (ret)
             {
                 _selected = i;
             }
-            // HighlightMatch(_reader[i]);
+            utility::HighlightMatch(_filter[i], _search_text);
         }
     }
     clipper.End();

@@ -1,6 +1,7 @@
 #include "windows/mainwindow.hpp"
 #include "windows/demowindow.hpp"
 #include "windows/searchwindow.hpp"
+#include "framework/common.hpp"
 
 using namespace window::logpad;
 
@@ -72,7 +73,7 @@ void MainWindow::Show()
             {
                 _selected = i;
             }
-            HighlightMatch(_reader[i]);
+            utility::HighlightMatch(_reader[i], _search_text);
         }
     }
     clipper.End();
@@ -82,39 +83,6 @@ void MainWindow::Show()
     ImGui::End();
 
     ShowDialog();
-}
-
-void MainWindow::HighlightMatch(const std::string& text)
-{
-    const ImVec2 p0 = ImGui::GetItemRectMin();
-    const ImGuiStyle& style = ImGui::GetStyle();
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
-
-    std::smatch match;
-    bool result = false;
-    try
-    {
-        result = std::regex_search(text, match, std::regex(_search_text, std::regex_constants::icase));
-    }
-    catch (std::regex_error&)
-    {
-        return;
-    }
-
-    if (result)
-    {
-        const char* text_str = text.c_str();
-        const auto& substr = match[0].str();
-        auto pos = text.find(substr);
-        if (pos != std::string::npos)
-        {
-            auto text_pos = ImGui::CalcTextSize(text_str, text_str + pos, true);
-            ImVec2 calc_pos = ImVec2(p0.x + int(style.ItemSpacing.x * 0.5f) + text_pos.x,
-                                     p0.y + int(style.ItemSpacing.y * 0.5f));
-            draw_list->AddText(calc_pos, IM_COL32(200, 200, 0, 200), substr.c_str());
-        }
-    }
-    return;
 }
 
 void MainWindow::ShowDialog()
