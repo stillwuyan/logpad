@@ -37,7 +37,8 @@ public:
     {
         if (_resize)
         {
-            ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiCond_Always);
+            const ImGuiViewport* viewport = ImGui::GetMainViewport();
+            ImGui::SetNextWindowPos(viewport->Pos, ImGuiCond_Always);
             ImGui::SetNextWindowSize(ImVec2(_width, _height), ImGuiCond_Always);
             _resize = false;
         }

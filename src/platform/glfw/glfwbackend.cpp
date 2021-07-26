@@ -131,6 +131,18 @@ void GLFWBackend::Process()
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+        // Update and Render additional Platform Windows
+        // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
+        //  For this specific demo app we could also call glfwMakeContextCurrent(window) directly)
+        ImGuiIO& io = ImGui::GetIO();
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            GLFWwindow* backup_current_context = glfwGetCurrentContext();
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+            glfwMakeContextCurrent(backup_current_context);
+        }
+
         glfwSwapBuffers(_window);
 
         if (ImGui::IsKeyPressed(300))
@@ -235,8 +247,13 @@ void GLFWBackend::Initialize()
     ImGui::CreateContext();
 
     ImGuiIO& io = ImGui::GetIO();
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+    if (_mode != WindowMode::fullscreen)
+    {
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+    }
 
     ImFontConfig config;
     config.MergeMode = true;
@@ -247,6 +264,14 @@ void GLFWBackend::Initialize()
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
     //ImGui::StyleColorsClassic();
+
+    // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
+    ImGuiStyle& style = ImGui::GetStyle();
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        style.WindowRounding = 0.0f;
+        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+    }
 
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(_window, true);
@@ -278,14 +303,18 @@ void GLFWBackend::ChangeMode()
     if (_mode == WindowMode::window)
     {
         _mode = WindowMode::fullscreen;
+        GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+        glfwSetWindowMonitor(_window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
     }
     else
     {
         _mode = WindowMode::window;
+        glfwSetWindowMonitor(_window, nullptr, 200, 150, _width[static_cast<uint8_t>(_mode)], _height[static_cast<uint8_t>(_mode)], 60);
     }
 
-    Finalize();
-    Initialize();
+    // Finalize();
+    // Initialize();
 }
 
 void GLFWBackend::OnSize(int width, int height)
