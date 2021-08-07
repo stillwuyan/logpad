@@ -6,7 +6,7 @@
 using namespace window::logpad;
 
 MainWindow::MainWindow(const std::string& name)
-: WindowBase(name)
+: WindowContainer(name)
 , _selected(-1)
 , _open_file(nullptr)
 {

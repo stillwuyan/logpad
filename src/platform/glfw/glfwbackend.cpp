@@ -75,13 +75,12 @@ GLFWBackend::GLFWBackend(int width, int height)
 {
 }
 
-
 GLFWBackend::~GLFWBackend()
 {
     Finalize();
 }
 
-void GLFWBackend::Insert(const std::string& name, std::unique_ptr<WindowContainer>& child)
+void GLFWBackend::Insert(const std::string& name, std::unique_ptr<WindowBase>& child)
 {
     _child_windows.emplace(name, std::move(child));
 }

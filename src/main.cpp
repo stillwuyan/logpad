@@ -9,7 +9,7 @@
 int main(int, char**) {
     std::string name("main");
     auto container = window::GLFWBackend(1000, 700);
-    std::unique_ptr<window::WindowContainer> main(new window::logpad::MainWindow(name));
+    std::unique_ptr<window::WindowBase> main(new window::logpad::MainWindow(name));
     container.Insert(name, main);
     container.Process();
     return 0;

@@ -6,13 +6,13 @@
 #include <memory>
 #include <functional>
 #include <imgui/imgui.h>
-#include "framework/windowbase.hpp"
+#include "framework/windowcontainer.hpp"
 #include "input/filereader.hpp"
 #include "windows/filedialog.hpp"
 
 namespace window { namespace logpad {
 
-class MainWindow : public WindowBase
+class MainWindow : public WindowContainer
 {
 public:
     MainWindow(const std::string& name);

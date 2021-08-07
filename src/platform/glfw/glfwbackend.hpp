@@ -9,7 +9,7 @@
 #include <string>
 #include <map>
 #include <memory>
-#include "framework/windowcontainer.hpp"
+#include "framework/windowbase.hpp"
 #include "framework/common.hpp"
 
 class GLFWwindow;
@@ -22,7 +22,7 @@ public:
     GLFWBackend(int width, int height);
     ~GLFWBackend();
 
-    void Insert(const std::string& name, std::unique_ptr<WindowContainer>& child);
+    void Insert(const std::string& name, std::unique_ptr<WindowBase>& child);
     void Remove(const std::string& name);
     void Process();
 
@@ -42,7 +42,7 @@ private:
     int _interval;
     float _en_font_size;
     std::string _name;
-    std::map<std::string, std::unique_ptr<WindowContainer>> _child_windows;
+    std::map<std::string, std::unique_ptr<WindowBase>> _child_windows;
 };
 
 }  // namespace end

@@ -8,10 +8,11 @@
 #include <tuple>
 #include <imgui/imgui.h>
 #include "framework/common.hpp"
+#include "framework/windowbase.hpp"
 
 namespace window {
 
-class WindowChild
+class WindowChild : public WindowBase
 {
 public:
     WindowChild(const std::string name)
@@ -36,7 +37,7 @@ public:
 
     virtual ~WindowChild() = default;
 
-    virtual bool Draw()
+    virtual bool Draw() override
     {
         bool open = true;
         if (_mode == WindowMode::to_fullscreen || _mode == WindowMode::to_window)
@@ -53,6 +54,9 @@ public:
 
         return open;
     }
+
+    virtual void Resize(int width, int height) override
+    {}
 
 protected:
     using KeyHandlers = std::map<std::string, std::tuple<std::function<bool(ImGuiIO&)>, std::function<void()>>>;
