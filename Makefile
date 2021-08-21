@@ -177,5 +177,8 @@ $(OUTPUT_DIR)/libyaml-cpp.dll: $(YAML_DIR)/lib/libyaml-cpp.dll
 run: dist $(OUTPUT_DIR)/$(EXE) $(OUTPUT_DIR)/libyaml-cpp.dll
 	@cd dist/ && ./logpad.exe
 
+debug: dist $(OUTPUT_DIR)/$(EXE) $(OUTPUT_DIR)/libyaml-cpp.dll
+	@cd dist/ && gdb ./logpad.exe
+
 clean:
 	rm -f $(OUTPUT_DIR)/$(EXE) $(OUTPUT_DIR)/*.o
