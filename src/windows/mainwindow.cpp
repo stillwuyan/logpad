@@ -66,11 +66,10 @@ void MainWindow::Show()
     if (_reader.LineNo() > 0 && ImGui::BeginTable("", 2, flags))
     {
         double selected_item_ypos = 0.0f;
-        ImGuiListClipper clipper;
-        clipper.Begin(_reader.LineNo());
-        while (clipper.Step())
+        _clipper.Begin(_reader.LineNo());
+        while (_clipper.Step())
         {
-            for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
+            for (int i = _clipper.DisplayStart; i < _clipper.DisplayEnd; ++i)
             {
                 ImGui::TableNextRow();
                 ImGui::TableNextColumn();
@@ -85,21 +84,17 @@ void MainWindow::Show()
                 selected_item_ypos = (i==_selected ? ImGui::GetCursorScreenPos().y : selected_item_ypos);
             }
         }
-        clipper.End();
+        _clipper.End();
 
         if (ImGui::IsKeyPressed(74/*J*/))
         {
             if (static_cast<size_t>(_selected) < _reader.LineNo()-1)
                 _selected++;
-            if (_selected >= clipper.DisplayEnd-1)
-                ImGui::SetScrollY(ImGui::GetScrollY() + clipper.ItemsHeight);
         }
         else if (ImGui::IsKeyPressed(75/*K*/))
         {
             if (_selected > 0)
                 _selected--;
-            if (_selected <= clipper.DisplayStart)
-                ImGui::SetScrollY(ImGui::GetScrollY() - clipper.ItemsHeight);
         }
         ImGui::EndTable();
     }

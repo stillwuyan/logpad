@@ -27,6 +27,7 @@ private:
     FileReader _reader;
     char _search_text[1024];
     std::unique_ptr<FileDialog> _open_file;
+    ImGuiListClipper _clipper;
 };
 
 }}  // namespace end
