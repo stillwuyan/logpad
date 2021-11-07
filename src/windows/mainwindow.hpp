@@ -5,9 +5,9 @@
 #include <string>
 #include <memory>
 #include <functional>
-#include <imgui/imgui.h>
-#include "framework/windowcontainer.hpp"
-#include "input/filereader.hpp"
+#include <imgui.h>
+#include "windows/base/windowcontainer.hpp"
+#include "sources/filereader.hpp"
 #include "windows/filedialog.hpp"
 
 namespace window { namespace logpad {
@@ -27,6 +27,7 @@ private:
     FileReader _reader;
     char _search_text[1024];
     std::unique_ptr<FileDialog> _open_file;
+    ImGuiListClipper _clipper;
 };
 
 }}  // namespace end

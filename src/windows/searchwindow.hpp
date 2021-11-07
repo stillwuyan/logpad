@@ -4,9 +4,9 @@
 #include <vector>
 #include <string>
 #include <atomic>
-#include <imgui/imgui.h>
-#include "framework/windowchild.hpp"
-#include "input/filefilter.hpp"
+#include <imgui.h>
+#include "windows/base/windowchild.hpp"
+#include "sources/filefilter.hpp"
 
 namespace window { namespace logpad {
 

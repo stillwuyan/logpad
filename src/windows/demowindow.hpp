@@ -1,8 +1,8 @@
 #ifndef DEMO_WINDOWN_HPP
 #define DEMO_WINDOWN_HPP
 
-#include <imgui/imgui.h>
-#include "framework/windowchild.hpp"
+#include <imgui.h>
+#include "windows/base/windowchild.hpp"
 
 namespace window { namespace logpad {
 

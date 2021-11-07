@@ -1,7 +1,7 @@
 #include "windows/mainwindow.hpp"
 #include "windows/demowindow.hpp"
 #include "windows/searchwindow.hpp"
-#include "framework/common.hpp"
+#include "common/utils.hpp"
 
 using namespace window::logpad;
 
@@ -15,7 +15,7 @@ MainWindow::MainWindow(const std::string& name)
             "Demo",
             {
                 [](ImGuiIO&) {
-                    return ImGui::IsKeyPressed(290/*F1*/);
+                    return ImGui::IsKeyPressed(ImGuiKey_F1, false);
                 },
                 [this]() {
                     UpdateChildWindow("Demo", std::unique_ptr<WindowChild>(new DemoWindow("Demo")));
@@ -26,7 +26,7 @@ MainWindow::MainWindow(const std::string& name)
             "Search",
             {
                 [](ImGuiIO&) {
-                    return ImGui::IsKeyPressed(292/*F3*/);
+                    return ImGui::IsKeyPressed(ImGuiKey_F3, false);
                 },
                 [this]() {
                     UpdateChildWindow("Search", std::unique_ptr<WindowChild>(new SearchWindow("Search", _reader.CurrentFile())));
@@ -37,7 +37,7 @@ MainWindow::MainWindow(const std::string& name)
             "Open",
             {
                 [](ImGuiIO& io) {
-                    return io.KeyCtrl && ImGui::IsKeyPressed(79/*o*/);
+                    return io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_O, false);
                 },
                 [this]() {
                     _open_file = std::make_unique<FileDialog>([this](const std::string& file) {
@@ -63,14 +63,13 @@ void MainWindow::Show()
     ImGui::Text("  Loading: %lld", _reader.LineNo());
 
     static ImGuiTableFlags flags = ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_SizingFixedFit;
-    if (_reader.LineNo() > 0 && ImGui::BeginTable("", 2, flags))
+    if (_reader.LineNo() > 0 && ImGui::BeginTable("item list", 2, flags))
     {
         double selected_item_ypos = 0.0f;
-        ImGuiListClipper clipper;
-        clipper.Begin(_reader.LineNo());
-        while (clipper.Step())
+        _clipper.Begin(_reader.LineNo());
+        while (_clipper.Step())
         {
-            for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
+            for (int i = _clipper.DisplayStart; i < _clipper.DisplayEnd; ++i)
             {
                 ImGui::TableNextRow();
                 ImGui::TableNextColumn();
@@ -79,27 +78,37 @@ void MainWindow::Show()
                                              ImGuiSelectableFlags_SpanAllColumns);
                 _selected = (ret ? i : _selected);
                 ImGui::TableNextColumn();
-                ImGui::Text(_reader[i].c_str());
-                utility::HighlightMatch(_reader[i], _search_text);
+                auto match = utility::HighlightMatch(_reader[i], _search_text);
+                if (match.empty()) {
+                    ImGui::TextUnformatted(_reader[i].c_str());
+                }
+                else
+                {
+                    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
+                    ImGui::TextUnformatted(match.prefix().str().c_str());
+                    ImGui::SameLine();
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f,1.0f));
+                    ImGui::TextUnformatted(match[0].str().c_str());
+                    ImGui::PopStyleColor();
+                    ImGui::SameLine();
+                    ImGui::TextUnformatted(match.suffix().str().c_str());
+                    ImGui::PopStyleVar();
+                }
 
                 selected_item_ypos = (i==_selected ? ImGui::GetCursorScreenPos().y : selected_item_ypos);
             }
         }
-        clipper.End();
+        _clipper.End();
 
-        if (ImGui::IsKeyPressed(74/*J*/))
+        if (ImGui::IsKeyPressed(ImGuiKey_J, false))
         {
             if (static_cast<size_t>(_selected) < _reader.LineNo()-1)
                 _selected++;
-            if (_selected >= clipper.DisplayEnd-1)
-                ImGui::SetScrollY(ImGui::GetScrollY() + clipper.ItemsHeight);
         }
-        else if (ImGui::IsKeyPressed(75/*K*/))
+        else if (ImGui::IsKeyPressed(ImGuiKey_K, false))
         {
             if (_selected > 0)
                 _selected--;
-            if (_selected <= clipper.DisplayStart)
-                ImGui::SetScrollY(ImGui::GetScrollY() - clipper.ItemsHeight);
         }
         ImGui::EndTable();
     }

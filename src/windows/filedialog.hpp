@@ -3,8 +3,8 @@
 
 #include <string>
 #include <functional>
-#include <imgui/imgui.h>
-#include <imgui-addons/FileBrowser/ImGuiFileBrowser.h>
+#include <imgui.h>
+#include <ImGuiFileBrowser.hpp>
 
 class FileDialog
 {

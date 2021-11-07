@@ -1,5 +1,5 @@
 #include "windows/searchwindow.hpp"
-#include "framework/common.hpp"
+#include "common/utils.hpp"
 
 using namespace window::logpad;
 

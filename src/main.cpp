@@ -3,12 +3,24 @@
 // If you are new to Dear ImGui, read documentation from the docs/ folder + read the top of imgui.cpp.
 // Read online: https://github.com/ocornut/imgui/tree/master/docs
 
-#include "platform/glfw/glfwbackend.hpp"
+#if defined(USE_GL3)
+#include "backend/glfw/gl3backend.hpp"
+#elif defined(USE_VULKAN)
+#include "backend/glfw/vulkanbackend.hpp"
+#endif
 #include "windows/mainwindow.hpp"
+#include "common/logger.hpp"
 
 int main(int, char**) {
+    ENTRY;
     std::string name("main");
-    auto container = window::GLFWBackend(1000, 700);
+#if defined(USE_GL3)
+    LOG_INFO("Use {}", "OpenGL");
+    auto container = window::glfw::GL3Backend(1000, 700);
+#elif defined(USE_VULKAN)
+    LOG_INFO("Use {}", "Vulkan");
+    auto container = window::glfw::VulkanBackend(1000, 700);
+#endif
     std::unique_ptr<window::WindowBase> main(new window::logpad::MainWindow(name));
     container.Insert(name, main);
     container.Process();
