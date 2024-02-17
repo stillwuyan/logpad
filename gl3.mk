@@ -63,11 +63,14 @@ endif
 ## BUILD RULES
 ##---------------------------------------------------------------------
 
-$(OUTPUT_DIR)/%.o:$(GLFW_DIR)/%.cpp $(GLFW_DIR)/%.hpp
+$(OUTPUT_DIR)/%.d: $(GLFW_DIR)/%.cpp
+	$(CXX) $(CXXFLAGS) -MM $< -MT $(@:.d=.o) > $@
+
+$(OUTPUT_DIR)/%.o:$(GLFW_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-$(OUTPUT_DIR)/%.o:$(GL3W_DIR)/GL/%.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+$(OUTPUT_DIR)/%.d: $(IMGUI_BACKEND_DIR)/%.cpp
+	$(CXX) $(CXXFLAGS) -MM $< -MT $(@:.d=.o) > $@
 
-$(OUTPUT_DIR)/%.o:$(GLAD_DIR)/src/%.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+$(OUTPUT_DIR)/%.o: $(IMGUI_BACKEND_DIR)/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
