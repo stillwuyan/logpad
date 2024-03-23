@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <thread>
 #include <chrono>
-#include "sources/filereader.hpp"
+#include "inputs/filereader.hpp"
 
 using namespace window::logpad;
 

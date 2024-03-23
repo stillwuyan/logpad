@@ -1,6 +1,6 @@
 #include "common/config.hpp"
 #include "common/pipe.hpp"
-#include "sources/filefilter.hpp"
+#include "inputs/filefilter.hpp"
 
 using namespace window::logpad;
 

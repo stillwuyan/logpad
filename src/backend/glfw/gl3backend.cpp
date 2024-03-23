@@ -26,53 +26,18 @@
 
 using namespace window::glfw;
 
-void GL3Backend::ErrorCallback(int error, const char* description)
-{
-    LOG_ERR("Glfw Error {}: {}", error, description);
-}
-
-void GL3Backend::SizeCallback(GLFWwindow* window, int width, int height)
-{
-    GL3Backend* instance = reinterpret_cast<GL3Backend*>(glfwGetWindowUserPointer(window));
-    if (instance)
-    {
-        instance->OnSize(width, height);
-    }
-}
-
-GL3Backend::GL3Backend(int width, int height)
-: _window(nullptr)
-, _mode(WindowMode::window)
-, _width{width, 0}, _height{height, 0}
+GL3Backend::GL3Backend(int x, int y, int width, int height)
+: GLFWBase(x, y, width, height)
 , _interval(2)
-, _en_font_size(24.0f)
-, _name("Log Viewer")
-{
-}
+{}
 
 GL3Backend::~GL3Backend()
 {
     Finalize();
 }
 
-void GL3Backend::Insert(const std::string& name, std::unique_ptr<WindowBase>& child)
+bool GL3Backend::Process()
 {
-    _child_windows.emplace(name, std::move(child));
-}
-
-void GL3Backend::Remove(const std::string& name)
-{
-    _child_windows.erase(name);
-}
-
-void GL3Backend::Process()
-{
-    Initialize();
-    if (_window == nullptr)
-    {
-        return;
-    }
-
     // Our state
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
@@ -91,10 +56,7 @@ void GL3Backend::Process()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        for (auto& child : _child_windows)
-        {
-            child.second->Draw();
-        }
+        _container->Draw();
 
         // Rendering
         ImGui::Render();
@@ -119,11 +81,9 @@ void GL3Backend::Process()
 
         glfwSwapBuffers(_window);
 
-        if (ImGui::IsKeyPressed(ImGuiKey_F11, false))
-        {
-            ChangeMode();
-        }
+        HandleKeyboard();
     }
+    return true;
 }
 
 void GL3Backend::Initialize()
@@ -131,6 +91,7 @@ void GL3Backend::Initialize()
     // Return if already initialized
     if (_window)
     {
+        LOG_WARN("glfw window been initialized already");
         return;
     }
 
@@ -166,20 +127,8 @@ void GL3Backend::Initialize()
 #endif
 
     // Create window with graphics context
-    if (_mode == WindowMode::fullscreen)
-    {
-        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-        const GLFWvidmode* vidmode = glfwGetVideoMode(monitor);
-        _width[static_cast<uint8_t>(WindowMode::fullscreen)] = vidmode->width;
-        _height[static_cast<uint8_t>(WindowMode::fullscreen)] = vidmode->height;
-        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
-        _window = glfwCreateWindow(vidmode->width, vidmode->height+1, _name.c_str(), NULL, NULL);
-    }
-    else
-    {
-        _window = glfwCreateWindow(_width[static_cast<uint8_t>(_mode)],
-                                   _height[static_cast<uint8_t>(_mode)]+1, _name.c_str(), NULL, NULL);
-    }
+    CreateWindow();
+
     if (_window == nullptr)
     {
         glfwTerminate();
@@ -196,7 +145,7 @@ void GL3Backend::Initialize()
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
-    if (_mode != WindowMode::fullscreen)
+    if (_current_mode != WindowMode::fullscreen)
     {
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
     }
@@ -219,14 +168,11 @@ void GL3Backend::Initialize()
 
     ImFontConfig config;
     config.MergeMode = true;
-    io.Fonts->AddFontFromMemoryCompressedBase85TTF(en_font_compressed_data_base85, _en_font_size);
-    io.Fonts->AddFontFromMemoryCompressedBase85TTF(zh_font_compressed_data_base85, _en_font_size-2, &config, io.Fonts->GetGlyphRangesChineseFull());
+    io.Fonts->AddFontFromMemoryCompressedBase85TTF(en_font_compressed_data_base85, _font_size);
+    io.Fonts->AddFontFromMemoryCompressedBase85TTF(zh_font_compressed_data_base85, _font_size-2, &config, io.Fonts->GetGlyphRangesChineseFull());
     io.Fonts->Build();
 
-    glfwSetWindowUserPointer(_window, this);
-    glfwSetWindowSizeCallback(_window, GL3Backend::SizeCallback);
-
-    OnSize(_width[static_cast<uint8_t>(_mode)], _height[static_cast<uint8_t>(_mode)]);
+    SetupWindow();
     return;
 }
 
@@ -242,33 +188,4 @@ void GL3Backend::Finalize()
         _window = nullptr;
     }
     return;
-}
-
-void GL3Backend::ChangeMode()
-{
-    if (_mode == WindowMode::window)
-    {
-        _mode = WindowMode::fullscreen;
-        GLFWmonitor *monitor = glfwGetPrimaryMonitor();
-        const GLFWvidmode *mode = glfwGetVideoMode(monitor);
-        glfwSetWindowMonitor(_window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
-    }
-    else
-    {
-        _mode = WindowMode::window;
-        glfwSetWindowMonitor(_window, nullptr, 200, 150, _width[static_cast<uint8_t>(_mode)], _height[static_cast<uint8_t>(_mode)], 60);
-    }
-
-    // Finalize();
-    // Initialize();
-}
-
-void GL3Backend::OnSize(int width, int height)
-{
-    _width[static_cast<uint8_t>(_mode)] = width;
-    _height[static_cast<uint8_t>(_mode)] = height;
-    for (auto& child : _child_windows)
-    {
-        child.second->Resize(width, height);
-    }
 }

@@ -16,13 +16,13 @@ int main(int, char**) {
     std::string name("main");
 #if defined(USE_GL3)
     LOG_INFO("Use {}", "OpenGL");
-    auto container = window::glfw::GL3Backend(1000, 700);
+    auto backend = window::glfw::GL3Backend(200, 200, 1000, 700);
 #elif defined(USE_VULKAN)
     LOG_INFO("Use {}", "Vulkan");
-    auto container = window::glfw::VulkanBackend(1000, 700);
+    auto backend = window::glfw::VulkanBackend(200, 200, 1000, 700);
 #endif
-    std::unique_ptr<window::WindowBase> main(new window::logpad::MainWindow(name));
-    container.Insert(name, main);
-    container.Process();
+    std::shared_ptr<window::WindowContainer> main = std::make_shared<window::logpad::MainWindow>(name);
+    backend.SetWindowContainer(name, main);
+    backend.Draw();
     return 0;
 }

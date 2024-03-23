@@ -6,44 +6,24 @@
 #ifndef GLFW_GL3_BACKEND_HPP
 #define GLFW_GL3_BACKEND_HPP
 
-#include <string>
-#include <map>
-#include <memory>
-#include "windows/base/windowbase.hpp"
-#include "common/utils.hpp"
+#include "backend/glfw/glfwbase.hpp"
 
 class GLFWwindow;
 
 namespace window {
 namespace glfw {
 
-class GL3Backend
+class GL3Backend : public GLFWBase
 {
 public:
-    GL3Backend(int width, int height);
+    GL3Backend(int x, int y, int width, int height);
     ~GL3Backend();
-
-    void Insert(const std::string& name, std::unique_ptr<WindowBase>& child);
-    void Remove(const std::string& name);
-    void Process();
-
-    static void ErrorCallback(int error, const char* description);
-    static void SizeCallback(GLFWwindow* window, int width, int height);
-
 private:
     void Initialize();
     void Finalize();
-    void ChangeMode();
-    void OnSize(int width, int height);
+    bool Process();
 
-    GLFWwindow* _window;
-    WindowMode _mode;
-    int _width[2];
-    int _height[2];
     int _interval;
-    float _en_font_size;
-    std::string _name;
-    std::map<std::string, std::unique_ptr<WindowBase>> _child_windows;
 };
 
 } // namespace glfw

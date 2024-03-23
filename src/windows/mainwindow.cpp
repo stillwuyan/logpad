@@ -14,9 +14,7 @@ MainWindow::MainWindow(const std::string& name)
         {   
             "Demo",
             {
-                [](ImGuiIO&) {
-                    return ImGui::IsKeyPressed(ImGuiKey_F1, false);
-                },
+                ImGuiKey_F1,
                 [this]() {
                     UpdateChildWindow("Demo", std::unique_ptr<WindowChild>(new DemoWindow("Demo")));
                 }
@@ -25,9 +23,7 @@ MainWindow::MainWindow(const std::string& name)
         {
             "Search",
             {
-                [](ImGuiIO&) {
-                    return ImGui::IsKeyPressed(ImGuiKey_F3, false);
-                },
+                ImGuiKey_F3,
                 [this]() {
                     UpdateChildWindow("Search", std::unique_ptr<WindowChild>(new SearchWindow("Search", _reader.CurrentFile())));
                 }
@@ -36,13 +32,23 @@ MainWindow::MainWindow(const std::string& name)
         {
             "Open",
             {
-                [](ImGuiIO& io) {
-                    return io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_O, false);
-                },
+                ImGuiKey_O,
                 [this]() {
                     _open_file = std::make_unique<FileDialog>([this](const std::string& file) {
                         _reader.Open(file);
                     });
+                }
+            }
+        },
+        {
+            "Check",
+            {
+                ImGuiKey_A,
+                [this]() {
+                        ImGuiViewport* viewPort = ImGui::GetWindowViewport();
+                        bool focus = ImGui::GetPlatformIO().Platform_GetWindowFocus(viewPort);
+                        std::cout << "A is pressed in " << _name << ", focus: " << focus << std::endl;
+
                 }
             }
         }

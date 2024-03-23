@@ -1,13 +1,8 @@
 #ifndef WINDOW_CONTAINER_HPP
 #define WINDOW_CONTAINER_HPP
 
-#include <string>
-#include <functional>
 #include <memory>
-#include <map>
-#include <tuple>
-#include <imgui.h>
-#include "windows/base/windowbase.hpp"
+#include "base/windowbase.hpp"
 
 namespace window {
 
@@ -54,7 +49,7 @@ public:
         return true;
     }
 
-    virtual void Resize(int width, int height) override
+    void Resize(int width, int height)
     {
         if (_width != width || _height != height)
         {
@@ -65,22 +60,9 @@ public:
     }
 
 protected:
-    using KeyHandlers = std::map<std::string, std::tuple<std::function<bool(ImGuiIO&)>, std::function<void()>>>;
     using ChildWindows = std::map<std::string, std::unique_ptr<WindowBase>>;
 
     virtual void Show() = 0;
-
-    void HandleKeyboard()
-    {
-        auto& io = ImGui::GetIO();
-        for (auto&& [_, item] : _key_handler)
-        {
-            if (std::get<0>(item)(io))
-            {
-                std::get<1>(item)();
-            }
-        }
-    }
 
     void UpdateChildWindow(std::string&& name, std::unique_ptr<WindowBase>&& child)
     {
@@ -101,7 +83,6 @@ protected:
     int _height;
     const std::string _name;
 
-    KeyHandlers _key_handler;
     ChildWindows _child_windows;
 };
 

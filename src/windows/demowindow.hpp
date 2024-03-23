@@ -2,7 +2,7 @@
 #define DEMO_WINDOWN_HPP
 
 #include <imgui.h>
-#include "windows/base/windowchild.hpp"
+#include "base/windowchild.hpp"
 
 namespace window { namespace logpad {
 

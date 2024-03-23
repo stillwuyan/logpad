@@ -23,7 +23,7 @@ public:
         if (_file_dialog.showFileDialog("Open File", 
                                         imgui_addons::ImGuiFileBrowser::DialogMode::OPEN,
                                         ImVec2(800, 600),
-                                        ".log,old,.bin"))
+                                        ".log,.bin,*.*"))
         {
             _proc(_file_dialog.selected_path);
         }

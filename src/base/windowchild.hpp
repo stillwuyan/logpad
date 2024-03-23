@@ -1,14 +1,8 @@
 #ifndef WINDOW_CHILD_HPP
 #define WINDOW_CHILD_HPP
 
-#include <functional>
 #include <memory>
-#include <map>
-#include <string>
-#include <tuple>
-#include <imgui.h>
-#include "common/utils.hpp"
-#include "windows/base/windowbase.hpp"
+#include "base/windowbase.hpp"
 
 namespace window {
 
@@ -21,14 +15,22 @@ public:
     , _mode(WindowMode::window)
     {
         _key_handler = {
-            {
-                "Fullscreen",
-                {
-                    [](ImGuiIO&) {
-                        return ImGui::IsKeyPressed(ImGuiKey_F12, false);
-                    },
+            { 
+                "Fullscreen", 
+                { 
+                    ImGuiKey_F12,
                     [this]() {
                         ChangeMode();
+                    }
+                },
+            },
+            {
+                "Check",
+                {
+                    ImGuiKey_A,
+                    [this]() {
+                        ImGuiViewport* viewPort = ImGui::GetWindowViewport();
+                        bool focus = ImGui::GetPlatformIO().Platform_GetWindowFocus(viewPort);
                     }
                 }
             }
@@ -55,26 +57,11 @@ public:
         return open;
     }
 
-    virtual void Resize(int width, int height) override
-    {}
-
 protected:
     using KeyHandlers = std::map<std::string, std::tuple<std::function<bool(ImGuiIO&)>, std::function<void()>>>;
     using ChildWindows = std::map<std::string, std::unique_ptr<WindowChild>>;
 
     virtual void Show() = 0;
-
-    void HandleKeyboard()
-    {
-        auto& io = ImGui::GetIO();
-        for (auto&& [_, item] : _key_handler)
-        {
-            if (std::get<0>(item)(io))
-            {
-                std::get<1>(item)();
-            }
-        }
-    }
 
     void ChangeMode()
     {
@@ -97,7 +84,6 @@ protected:
         }
     }
 
-    KeyHandlers _key_handler;
     const std::string _name;
     ImGuiWindowFlags _flags;
     WindowMode _mode;

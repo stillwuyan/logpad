@@ -6,8 +6,8 @@
 #include <memory>
 #include <functional>
 #include <imgui.h>
-#include "windows/base/windowcontainer.hpp"
-#include "sources/filereader.hpp"
+#include "base/windowcontainer.hpp"
+#include "inputs/filereader.hpp"
 #include "windows/filedialog.hpp"
 
 namespace window { namespace logpad {

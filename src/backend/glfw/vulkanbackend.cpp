@@ -20,7 +20,6 @@
 #include <stdlib.h>         // abort
 #define GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
 //#include <vulkan/vulkan_beta.h>
 
@@ -28,7 +27,7 @@
 #include "backend/glfw/vulkanbackend.hpp"
 #include "fonts/en_font.hpp"
 #include "fonts/zh_font.hpp"
-#include "common/logger.hpp"
+
 
 // [Win32] Our example includes a copy of glfw3.lib pre-compiled with VS2010 to maximize ease of testing and compatibility with old VS compilers.
 // To link with VS2010-era libraries, VS2015+ requires linking with legacy_stdio_definitions.lib, which we do using this pragma.
@@ -385,53 +384,17 @@ static void FramePresent(ImGui_ImplVulkanH_Window* wd)
 
 using namespace window::glfw;
 
-void VulkanBackend::ErrorCallback(int error, const char* description)
-{
-    LOG_ERR("Glfw Error {}: {}", error, description);
-}
-
-void VulkanBackend::SizeCallback(GLFWwindow* window, int width, int height)
-{
-    VulkanBackend* instance = reinterpret_cast<VulkanBackend*>(glfwGetWindowUserPointer(window));
-    if (instance)
-    {
-        instance->OnSize(width, height);
-    }
-}
-
-VulkanBackend::VulkanBackend(int width, int height)
-: _window(nullptr)
-, _mode(WindowMode::window)
-, _width{width, 0}, _height{height, 0}
-, _interval(2)
-, _en_font_size(28.0f)
-, _name("Log Viewer")
-{
-}
+VulkanBackend::VulkanBackend(int x, int y, int width, int height)
+: GLFWBase(x, y, width, height)
+{}
 
 VulkanBackend::~VulkanBackend()
 {
     Finalize();
 }
 
-void VulkanBackend::Insert(const std::string& name, std::unique_ptr<WindowBase>& child)
+bool VulkanBackend::Process()
 {
-    _child_windows.emplace(name, std::move(child));
-}
-
-void VulkanBackend::Remove(const std::string& name)
-{
-    _child_windows.erase(name);
-}
-
-void VulkanBackend::Process()
-{
-    Initialize();
-    if (_window == nullptr)
-    {
-        return;
-    }
-
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     ImGuiIO& io = ImGui::GetIO();
     ImGui_ImplVulkanH_Window* wd = &g_MainWindowData;
@@ -465,10 +428,7 @@ void VulkanBackend::Process()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        for (auto& child : _child_windows)
-        {
-            child.second->Draw();
-        }
+        _container->Draw();
 
         // Rendering
         ImGui::Render();
@@ -492,12 +452,9 @@ void VulkanBackend::Process()
         if (!main_is_minimized)
             FramePresent(wd);
 
-        if (ImGui::IsKeyPressed(ImGuiKey_F11, false))
-        {
-            ChangeMode();
-        }
+        HandleKeyboard();
     }
-    return;
+    return true;
 }
 
 void VulkanBackend::Initialize()
@@ -506,6 +463,7 @@ void VulkanBackend::Initialize()
     // Return if already initialized
     if (_window)
     {
+        LOG_WARN("glfw window been initialized already");
         return;
     }
 
@@ -519,20 +477,7 @@ void VulkanBackend::Initialize()
 
     // Create window with Vulkan context
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    if (_mode == WindowMode::fullscreen)
-    {
-        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-        const GLFWvidmode* vidmode = glfwGetVideoMode(monitor);
-        _width[static_cast<uint8_t>(WindowMode::fullscreen)] = vidmode->width;
-        _height[static_cast<uint8_t>(WindowMode::fullscreen)] = vidmode->height;
-        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
-        _window = glfwCreateWindow(vidmode->width, vidmode->height+1, _name.c_str(), nullptr, nullptr);
-    }
-    else
-    {
-        _window = glfwCreateWindow(_width[static_cast<uint8_t>(_mode)],
-                                   _height[static_cast<uint8_t>(_mode)]+1, _name.c_str(), nullptr, nullptr);
-    }
+    CreateWindow();
 
     if (!glfwVulkanSupported())
     {
@@ -565,7 +510,7 @@ void VulkanBackend::Initialize()
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
-    if (_mode != WindowMode::fullscreen)
+    if (_current_mode != WindowMode::fullscreen)
     {
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
     }
@@ -619,14 +564,11 @@ void VulkanBackend::Initialize()
     //IM_ASSERT(font != nullptr);
     ImFontConfig config;
     config.MergeMode = true;
-    io.Fonts->AddFontFromMemoryCompressedBase85TTF(en_font_compressed_data_base85, _en_font_size);
-    io.Fonts->AddFontFromMemoryCompressedBase85TTF(zh_font_compressed_data_base85, _en_font_size-2, &config, io.Fonts->GetGlyphRangesChineseFull());
+    io.Fonts->AddFontFromMemoryCompressedBase85TTF(en_font_compressed_data_base85, _font_size);
+    io.Fonts->AddFontFromMemoryCompressedBase85TTF(zh_font_compressed_data_base85, _font_size-2, &config, io.Fonts->GetGlyphRangesChineseFull());
     io.Fonts->Build();
 
-    glfwSetWindowUserPointer(_window, this);
-    glfwSetWindowSizeCallback(_window, VulkanBackend::SizeCallback);
-
-    OnSize(_width[static_cast<uint8_t>(_mode)], _height[static_cast<uint8_t>(_mode)]);
+    SetupWindow();
     return;
 }
 
@@ -650,31 +592,4 @@ void VulkanBackend::Finalize()
         _window = nullptr;
     }
     return;
-}
-
-void VulkanBackend::ChangeMode()
-{
-    ENTRY;
-    if (_mode == WindowMode::window)
-    {
-        _mode = WindowMode::fullscreen;
-        GLFWmonitor *monitor = glfwGetPrimaryMonitor();
-        const GLFWvidmode *mode = glfwGetVideoMode(monitor);
-        glfwSetWindowMonitor(_window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
-    }
-    else
-    {
-        _mode = WindowMode::window;
-        glfwSetWindowMonitor(_window, nullptr, 200, 150, _width[static_cast<uint8_t>(_mode)], _height[static_cast<uint8_t>(_mode)], 60);
-    }
-}
-
-void VulkanBackend::OnSize(int width, int height)
-{
-    _width[static_cast<uint8_t>(_mode)] = width;
-    _height[static_cast<uint8_t>(_mode)] = height;
-    for (auto& child : _child_windows)
-    {
-        child.second->Resize(width, height);
-    }
 }

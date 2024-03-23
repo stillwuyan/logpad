@@ -8,7 +8,7 @@ OUTPUT_DIR = dist
 
 IMGUI_DIR = 3rdparty/imgui
 WINDOWS_DIR = src/windows
-INPUT_DIR = src/sources
+INPUT_DIR = src/inputs
 JSON_DIR = 3rdparty/json
 DIRENT_DIR = 3rdparty/dirent
 FILE_BROWSER_DIR = 3rdparty/file-browser

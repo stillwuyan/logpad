@@ -5,8 +5,8 @@
 #include <string>
 #include <atomic>
 #include <imgui.h>
-#include "windows/base/windowchild.hpp"
-#include "sources/filefilter.hpp"
+#include "base/windowchild.hpp"
+#include "inputs/filefilter.hpp"
 
 namespace window { namespace logpad {
 
